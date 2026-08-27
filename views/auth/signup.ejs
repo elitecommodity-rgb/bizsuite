@@ -1,0 +1,39 @@
+<%- include('../partials/head', { title }) %>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand"><div class="mark">B</div><div class="name">BizSuite</div></div>
+    <h1>Create your business account</h1>
+    <p class="auth-sub">Stock, sales, deliveries, billing and reports — in one place.</p>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="POST" action="/signup">
+      <div class="form-row">
+        <label for="businessName">Business name</label>
+        <input type="text" id="businessName" name="businessName" value="<%= form.businessName || '' %>" required />
+      </div>
+      <div class="form-row">
+        <label for="industry">Industry (optional)</label>
+        <input type="text" id="industry" name="industry" placeholder="e.g. Scaffolding, Retail, Catering" value="<%= form.industry || '' %>" />
+      </div>
+      <div class="form-row">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" value="<%= form.name || '' %>" required />
+      </div>
+      <div class="form-row">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="<%= form.email || '' %>" required />
+      </div>
+      <div class="form-row">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" minlength="8" required />
+        <div class="hint">At least 8 characters.</div>
+      </div>
+      <div class="form-row">
+        <label for="confirmPassword">Confirm password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required />
+      </div>
+      <button type="submit" class="btn btn-block">Create account</button>
+    </form>
+    <div class="auth-foot">Already have an account? <a href="/login">Log in</a></div>
+  </div>
+</div>
+<%- include('../partials/foot') %>
