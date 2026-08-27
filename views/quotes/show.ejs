@@ -1,0 +1,53 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div>
+      <h1>Quote <%= quote.number %></h1>
+      <div class="sub"><%= quote.client_name %> · <span class="badge badge-muted"><%= quote.status %></span></div>
+    </div>
+    <div class="tag-row">
+      <form method="POST" action="/quotes/<%= quote.id %>/send"><button type="submit" class="btn btn-outline btn-sm">✉ Email to client</button></form>
+      <% if (quote.status === 'DRAFT' || quote.status === 'SENT') { %>
+        <form method="POST" action="/quotes/<%= quote.id %>/status"><input type="hidden" name="status" value="ACCEPTED" /><button type="submit" class="btn btn-sm">Mark accepted</button></form>
+        <form method="POST" action="/quotes/<%= quote.id %>/status"><input type="hidden" name="status" value="DECLINED" /><button type="submit" class="btn btn-outline btn-sm">Mark declined</button></form>
+      <% } %>
+      <% if (!order) { %>
+      <form method="POST" action="/quotes/<%= quote.id %>/convert"><button type="submit" class="btn btn-sm">Convert to order</button></form>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <div class="card-title">Line items</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Description</th><th class="right">Qty</th><th class="right">Unit price</th><th class="right">Total</th></tr></thead>
+            <tbody>
+              <% lines.forEach(function(l) { %>
+              <tr><td><%= l.description %></td><td class="right"><%= l.quantity %></td><td class="right"><%= tenant.currency %> <%= l.unit_price.toFixed(2) %></td><td class="right"><%= tenant.currency %> <%= l.line_total.toFixed(2) %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="totals-box">
+          <div class="kv"><span class="k">Subtotal</span><span class="v"><%= tenant.currency %> <%= quote.subtotal.toFixed(2) %></span></div>
+          <div class="kv"><span class="k">Tax (<%= quote.tax_rate_pct %>%)</span><span class="v"><%= tenant.currency %> <%= quote.tax_amount.toFixed(2) %></span></div>
+          <div class="kv grand"><span class="k">Total</span><span class="v"><%= tenant.currency %> <%= quote.total.toFixed(2) %></span></div>
+        </div>
+      </div>
+      <% if (quote.notes) { %><div class="card"><div class="card-title">Notes</div><p class="mb-0"><%= quote.notes %></p></div><% } %>
+    </div>
+    <div>
+      <div class="card">
+        <div class="kv"><span class="k">Client</span><span class="v"><a href="/clients/<%= quote.client_id %>"><%= quote.client_name %></a></span></div>
+        <div class="kv"><span class="k">Issued</span><span class="v"><%= new Date(quote.issue_date + 'Z').toLocaleDateString() %></span></div>
+        <div class="kv"><span class="k">Expires</span><span class="v"><%= quote.expiry_date ? new Date(quote.expiry_date).toLocaleDateString() : '—' %></span></div>
+        <div class="kv"><span class="k">Status</span><span class="v"><%= quote.status %></span></div>
+        <% if (order) { %><div class="kv"><span class="k">Order</span><span class="v"><a href="/orders/<%= order.id %>"><%= order.number %></a></span></div><% } %>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>

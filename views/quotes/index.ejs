@@ -1,0 +1,38 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Quotes</h1><div class="sub"><%= quotes.length %> quote<%= quotes.length === 1 ? '' : 's' %></div></div>
+    <a href="/quotes/new" class="btn">+ New quote</a>
+  </div>
+  <div class="pill-nav">
+    <a href="/quotes" class="<%= !status ? 'active' : '' %>">All</a>
+    <a href="/quotes?status=DRAFT" class="<%= status === 'DRAFT' ? 'active' : '' %>">Draft</a>
+    <a href="/quotes?status=SENT" class="<%= status === 'SENT' ? 'active' : '' %>">Sent</a>
+    <a href="/quotes?status=ACCEPTED" class="<%= status === 'ACCEPTED' ? 'active' : '' %>">Accepted</a>
+    <a href="/quotes?status=DECLINED" class="<%= status === 'DECLINED' ? 'active' : '' %>">Declined</a>
+  </div>
+  <div class="card">
+    <% if (!quotes.length) { %>
+      <div class="empty-state"><p>No quotes here yet.</p><a href="/quotes/new" class="btn">Create a quote</a></div>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Number</th><th>Client</th><th>Status</th><th>Issued</th><th class="right">Total</th><th></th></tr></thead>
+        <tbody>
+          <% quotes.forEach(function(q) { %>
+          <tr>
+            <td><strong><%= q.number %></strong></td>
+            <td><%= q.client_name %></td>
+            <td><span class="badge badge-muted"><%= q.status %></span></td>
+            <td class="muted"><%= new Date(q.issue_date + 'Z').toLocaleDateString() %></td>
+            <td class="right"><%= tenant.currency %> <%= q.total.toFixed(2) %></td>
+            <td class="right"><a href="/quotes/<%= q.id %>" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
