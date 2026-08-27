@@ -1,0 +1,21 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head"><h1><%= title %></h1></div>
+  <div class="card" style="max-width:560px;">
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="POST" action="<%= clientRecord.id ? '/clients/' + clientRecord.id : '/clients' %>">
+      <div class="form-row"><label>Name</label><input type="text" name="name" value="<%= clientRecord.name || '' %>" required /></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Email</label><input type="email" name="email" value="<%= clientRecord.email || '' %>" /></div>
+        <div class="form-row"><label>Phone</label><input type="tel" name="phone" value="<%= clientRecord.phone || '' %>" /></div>
+      </div>
+      <div class="form-row"><label>Address</label><textarea name="address"><%= clientRecord.address || '' %></textarea></div>
+      <div class="form-row"><label>Notes</label><textarea name="notes"><%= clientRecord.notes || '' %></textarea></div>
+      <div class="form-actions">
+        <button type="submit" class="btn"><%= clientRecord.id ? 'Save changes' : 'Add client' %></button>
+        <a href="<%= clientRecord.id ? '/clients/' + clientRecord.id : '/clients' %>" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>

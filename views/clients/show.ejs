@@ -1,0 +1,65 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1><%= clientRecord.name %></h1><div class="sub"><%= clientRecord.email || '' %><% if (clientRecord.email && clientRecord.phone) { %> · <% } %><%= clientRecord.phone || '' %></div></div>
+    <div class="tag-row">
+      <a href="/quotes/new?clientId=<%= clientRecord.id %>" class="btn btn-sm">+ New quote</a>
+      <a href="/clients/<%= clientRecord.id %>/edit" class="btn btn-outline btn-sm">Edit</a>
+      <form method="POST" action="/clients/<%= clientRecord.id %>/delete" onsubmit="return confirm('Delete this client?');">
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <div class="card-title">Quotes (<%= quotes.length %>)</div>
+        <% if (!quotes.length) { %><div class="table-empty">No quotes yet.</div><% } else { %>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Number</th><th>Status</th><th class="right">Total</th><th></th></tr></thead>
+          <tbody><% quotes.forEach(function(q) { %>
+            <tr><td><%= q.number %></td><td><span class="badge badge-muted"><%= q.status %></span></td><td class="right"><%= tenant.currency %> <%= q.total.toFixed(2) %></td><td class="right"><a href="/quotes/<%= q.id %>" class="btn btn-sm btn-outline">View</a></td></tr>
+          <% }) %></tbody>
+        </table></div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Jobs / Orders (<%= orders.length %>)</div>
+        <% if (!orders.length) { %><div class="table-empty">No orders yet.</div><% } else { %>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Number</th><th>Status</th><th>Delivery date</th><th class="right">Total</th><th></th></tr></thead>
+          <tbody><% orders.forEach(function(o) { %>
+            <tr><td><%= o.number %></td><td><span class="badge badge-muted"><%= o.status %></span></td><td class="muted"><%= o.delivery_date ? new Date(o.delivery_date).toLocaleDateString() : '—' %></td><td class="right"><%= tenant.currency %> <%= o.total.toFixed(2) %></td><td class="right"><a href="/orders/<%= o.id %>" class="btn btn-sm btn-outline">View</a></td></tr>
+          <% }) %></tbody>
+        </table></div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Invoices (<%= invoices.length %>)</div>
+        <% if (!invoices.length) { %><div class="table-empty">No invoices yet.</div><% } else { %>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Number</th><th>Status</th><th class="right">Total</th><th class="right">Outstanding</th><th></th></tr></thead>
+          <tbody><% invoices.forEach(function(i) { %>
+            <tr><td><%= i.number %></td><td><span class="badge badge-muted"><%= i.status %></span></td><td class="right"><%= tenant.currency %> <%= i.total.toFixed(2) %></td><td class="right"><%= tenant.currency %> <%= (i.total - i.amount_paid).toFixed(2) %></td><td class="right"><a href="/invoices/<%= i.id %>" class="btn btn-sm btn-outline">View</a></td></tr>
+          <% }) %></tbody>
+        </table></div>
+        <% } %>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">Details</div>
+        <div class="kv"><span class="k">Email</span><span class="v"><%= clientRecord.email || '—' %></span></div>
+        <div class="kv"><span class="k">Phone</span><span class="v"><%= clientRecord.phone || '—' %></span></div>
+        <div class="kv"><span class="k">Address</span><span class="v"><%= clientRecord.address || '—' %></span></div>
+        <div class="kv"><span class="k">Outstanding balance</span><span class="v" style="<%= outstanding > 0 ? 'color:var(--danger)' : '' %>"><%= tenant.currency %> <%= outstanding.toFixed(2) %></span></div>
+        <% if (clientRecord.notes) { %><div style="margin-top:12px;"><div class="muted" style="font-size:0.78rem;margin-bottom:4px;">NOTES</div><%= clientRecord.notes %></div><% } %>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>

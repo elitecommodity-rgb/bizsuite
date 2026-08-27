@@ -1,0 +1,32 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Clients</h1><div class="sub"><%= clients.length %> client<%= clients.length === 1 ? '' : 's' %></div></div>
+    <a href="/clients/new" class="btn">+ Add client</a>
+  </div>
+  <div class="card">
+    <form method="GET" action="/clients" style="margin-bottom: <%= clients.length ? '14px' : '0' %>;">
+      <input type="text" name="q" placeholder="Search clients…" value="<%= q %>" />
+    </form>
+    <% if (!clients.length) { %>
+      <div class="empty-state"><p>No clients yet.</p><a href="/clients/new" class="btn">Add your first client</a></div>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th></th></tr></thead>
+        <tbody>
+          <% clients.forEach(function(c) { %>
+          <tr>
+            <td><a href="/clients/<%= c.id %>"><strong><%= c.name %></strong></a></td>
+            <td class="muted"><%= c.email || '—' %></td>
+            <td class="muted"><%= c.phone || '—' %></td>
+            <td class="right"><a href="/clients/<%= c.id %>" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
