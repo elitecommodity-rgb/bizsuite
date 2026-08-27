@@ -1,0 +1,24 @@
+{
+  "name": "bizsuite",
+  "version": "0.1.0",
+  "description": "Generic multi-tenant business management platform (stock, sales, deliveries, project timelines, billing, client emailing, BI reports) by Gilded Age Consulting",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/db/seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.1",
+    "nodemailer": "^9.0.5"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

@@ -1,0 +1,31 @@
+# Render Blueprint — kept here for reference / manual dashboard deploys.
+# The actual first deploy in this project was done via Render's MCP tools
+# (create_web_service), which take these same settings as direct parameters
+# rather than reading this file.
+#
+# IMPORTANT — persistent storage: BizSuite stores its data in a SQLite file
+# on local disk (DATABASE_URL). Render's free web services do NOT have a
+# persistent disk attached by default — anything written to disk is wiped on
+# restart/redeploy. To keep data permanently, attach a paid-plan persistent
+# disk from the Render dashboard (Service → Disks → Add Disk, mount path
+# /var/data) and set DATABASE_URL to file:/var/data/bizsuite.db.
+
+services:
+  - type: web
+    name: bizsuite
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./data/prod.db
+    # disk:
+    #   name: bizsuite-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
