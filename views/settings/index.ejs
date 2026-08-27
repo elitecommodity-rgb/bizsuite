@@ -1,0 +1,33 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head"><h1>Settings</h1></div>
+  <div class="card" style="max-width:560px;">
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="POST" action="/settings" enctype="multipart/form-data">
+      <div class="form-row"><label>Business name</label><input type="text" name="name" value="<%= tenant.name %>" required /></div>
+      <div class="form-row"><label>Industry</label><input type="text" name="industry" value="<%= tenant.industry || '' %>" /></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Currency code</label><input type="text" name="currency" value="<%= tenant.currency %>" maxlength="6" /></div>
+        <div class="form-row"><label>Default tax rate (%)</label><input type="number" step="0.01" name="taxRatePct" value="<%= tenant.tax_rate_pct %>" /></div>
+      </div>
+      <div class="form-row"><label>Brand color</label><input type="color" name="primaryColor" value="<%= tenant.primary_color %>" style="width:80px;padding:2px;" /></div>
+      <div class="form-row">
+        <label>Logo</label>
+        <input type="file" name="logo" accept="image/*" />
+        <% if (tenant.logo_url) { %><img src="<%= tenant.logo_url %>" style="max-width:120px;border-radius:8px;margin-top:8px;display:block;" /><% } %>
+      </div>
+      <button type="submit" class="btn">Save settings</button>
+    </form>
+  </div>
+
+  <div class="card" style="max-width:560px;">
+    <div class="card-title">Client emailing</div>
+    <% if (liveEmail) { %>
+      <p class="mb-0">Live SMTP is configured — quotes and invoices are sent as real emails.</p>
+    <% } else { %>
+      <p>No SMTP provider is configured yet, so emails to clients are logged as previews instead of actually sent (nothing fails or gets stuck — it's a safe default to demo the full flow).</p>
+      <p class="mb-0 muted" style="font-size:0.85rem;">To send real email, set SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS / SMTP_FROM in the environment and redeploy.</p>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
