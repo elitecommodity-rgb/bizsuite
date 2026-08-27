@@ -1,0 +1,137 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div>
+      <h1>Order <%= order.number %></h1>
+      <div class="sub"><a href="/clients/<%= order.client_id %>"><%= order.client_name %></a> · <span class="badge badge-muted"><%= order.status.replace('_',' ') %></span></div>
+    </div>
+    <div class="tag-row">
+      <% if (order.status === 'PENDING') { %>
+        <form method="POST" action="/orders/<%= order.id %>/status"><input type="hidden" name="status" value="IN_PROGRESS" /><button class="btn btn-sm">Start job</button></form>
+      <% } %>
+      <% if (order.status === 'IN_PROGRESS' || order.status === 'DELIVERED') { %>
+        <form method="POST" action="/orders/<%= order.id %>/status"><input type="hidden" name="status" value="COMPLETED" /><button class="btn btn-sm">Mark completed</button></form>
+      <% } %>
+      <% if (order.status !== 'CANCELLED' && order.status !== 'COMPLETED') { %>
+        <form method="POST" action="/orders/<%= order.id %>/status" onsubmit="return confirm('Cancel this order?');"><input type="hidden" name="status" value="CANCELLED" /><button class="btn btn-outline btn-sm">Cancel</button></form>
+      <% } %>
+      <% if (!invoice) { %>
+        <a href="/invoices/new?orderId=<%= order.id %>" class="btn btn-sm">Create invoice</a>
+      <% } else { %>
+        <a href="/invoices/<%= invoice.id %>" class="btn btn-sm btn-outline">View invoice <%= invoice.number %></a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <div class="card-title">Project timeline</div>
+        <form method="POST" action="/orders/<%= order.id %>/dates">
+          <div class="form-grid">
+            <div class="form-row"><label>Start date</label><input type="date" name="startDate" value="<%= order.start_date ? order.start_date.slice(0,10) : '' %>" /></div>
+            <div class="form-row"><label>Delivery / completion due</label><input type="date" name="deliveryDate" value="<%= order.delivery_date ? order.delivery_date.slice(0,10) : '' %>" /></div>
+          </div>
+          <button type="submit" class="btn btn-outline btn-sm">Update timeline</button>
+        </form>
+        <% if (order.completion_date) { %>
+          <div class="kv" style="margin-top:10px;"><span class="k">Completed on</span><span class="v"><%= new Date(order.completion_date).toLocaleDateString() %></span></div>
+        <% } %>
+
+        <% if (order.extension_status === 'REQUESTED') { %>
+          <div class="alert alert-info" style="margin-top:16px;">
+            Extension requested to <strong><%= new Date(order.extension_requested_date).toLocaleDateString() %></strong><% if (order.extension_reason) { %> — "<%= order.extension_reason %>"<% } %>
+            <div class="tag-row" style="margin-top:10px;">
+              <form method="POST" action="/orders/<%= order.id %>/extension-decision"><input type="hidden" name="decision" value="APPROVED" /><button class="btn btn-sm">Approve</button></form>
+              <form method="POST" action="/orders/<%= order.id %>/extension-decision"><input type="hidden" name="decision" value="DECLINED" /><button class="btn btn-outline btn-sm">Decline</button></form>
+            </div>
+          </div>
+        <% } else { %>
+          <details style="margin-top:16px;">
+            <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;">Request a delivery date extension</summary>
+            <form method="POST" action="/orders/<%= order.id %>/extension-request" style="margin-top:10px;">
+              <div class="form-row"><label>New requested date</label><input type="date" name="requestedDate" required /></div>
+              <div class="form-row"><label>Reason</label><input type="text" name="reason" placeholder="Why is more time needed?" /></div>
+              <button type="submit" class="btn btn-sm">Submit request</button>
+            </form>
+          </details>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Line items</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Description</th><th class="right">Qty</th><th class="right">Unit price</th><th class="right">Total</th></tr></thead>
+            <tbody>
+              <% lines.forEach(function(l) { %>
+              <tr><td><%= l.description %></td><td class="right"><%= l.quantity %></td><td class="right"><%= tenant.currency %> <%= l.unit_price.toFixed(2) %></td><td class="right"><%= tenant.currency %> <%= l.line_total.toFixed(2) %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="totals-box">
+          <div class="kv"><span class="k">Subtotal</span><span class="v"><%= tenant.currency %> <%= order.subtotal.toFixed(2) %></span></div>
+          <div class="kv"><span class="k">Tax (<%= order.tax_rate_pct %>%)</span><span class="v"><%= tenant.currency %> <%= order.tax_amount.toFixed(2) %></span></div>
+          <div class="kv grand"><span class="k">Total</span><span class="v"><%= tenant.currency %> <%= order.total.toFixed(2) %></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Deliveries</div>
+        <% if (deliveries.length) { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Status</th><th>Scheduled</th><th>Address</th><th></th></tr></thead>
+            <tbody>
+              <% deliveries.forEach(function(d) { %>
+              <tr>
+                <td>
+                  <% if (d.status === 'DELIVERED') { %><span class="badge badge-success">Delivered</span>
+                  <% } else if (d.status === 'FAILED') { %><span class="badge badge-danger">Failed</span>
+                  <% } else if (d.status === 'OUT_FOR_DELIVERY') { %><span class="badge badge-info">Out for delivery</span>
+                  <% } else { %><span class="badge badge-muted">Scheduled</span><% } %>
+                </td>
+                <td class="muted"><%= d.scheduled_date ? new Date(d.scheduled_date).toLocaleDateString() : '—' %></td>
+                <td class="muted"><%= d.address || '—' %></td>
+                <td class="right">
+                  <form method="POST" action="/deliveries/<%= d.id %>/status" style="display:inline;">
+                    <select name="status" onchange="this.form.submit()" style="width:auto;display:inline-block;">
+                      <option value="SCHEDULED" <%= d.status==='SCHEDULED'?'selected':'' %>>Scheduled</option>
+                      <option value="OUT_FOR_DELIVERY" <%= d.status==='OUT_FOR_DELIVERY'?'selected':'' %>>Out for delivery</option>
+                      <option value="DELIVERED" <%= d.status==='DELIVERED'?'selected':'' %>>Delivered</option>
+                      <option value="FAILED" <%= d.status==='FAILED'?'selected':'' %>>Failed</option>
+                    </select>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %><div class="table-empty">No deliveries scheduled yet.</div><% } %>
+        <details style="margin-top:14px;">
+          <summary style="cursor:pointer;font-size:0.85rem;font-weight:600;">Schedule a delivery</summary>
+          <form method="POST" action="/deliveries/order/<%= order.id %>" style="margin-top:10px;">
+            <div class="form-grid">
+              <div class="form-row"><label>Scheduled date</label><input type="date" name="scheduledDate" /></div>
+              <div class="form-row"><label>Address</label><input type="text" name="address" placeholder="Delivery address" /></div>
+            </div>
+            <div class="form-row"><label>Notes</label><input type="text" name="notes" /></div>
+            <button type="submit" class="btn btn-sm">Schedule</button>
+          </form>
+        </details>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="kv"><span class="k">Client</span><span class="v"><a href="/clients/<%= order.client_id %>"><%= order.client_name %></a></span></div>
+        <div class="kv"><span class="k">Status</span><span class="v"><%= order.status.replace('_',' ') %></span></div>
+        <div class="kv"><span class="k">Created</span><span class="v"><%= new Date(order.created_at + 'Z').toLocaleDateString() %></span></div>
+        <% if (order.notes) { %><div style="margin-top:12px;"><div class="muted" style="font-size:0.78rem;margin-bottom:4px;">NOTES</div><%= order.notes %></div><% } %>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>

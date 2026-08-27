@@ -1,0 +1,42 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Jobs / Orders</h1><div class="sub"><%= orders.length %> order<%= orders.length === 1 ? '' : 's' %><% if (pendingExtensions) { %> · <span style="color:var(--warn)"><%= pendingExtensions %> extension request<%= pendingExtensions === 1 ? '' : 's' %> pending</span><% } %></div></div>
+    <a href="/orders/new" class="btn">+ New order</a>
+  </div>
+  <div class="pill-nav">
+    <a href="/orders" class="<%= !status ? 'active' : '' %>">All</a>
+    <a href="/orders?status=PENDING" class="<%= status === 'PENDING' ? 'active' : '' %>">Pending</a>
+    <a href="/orders?status=IN_PROGRESS" class="<%= status === 'IN_PROGRESS' ? 'active' : '' %>">In progress</a>
+    <a href="/orders?status=DELIVERED" class="<%= status === 'DELIVERED' ? 'active' : '' %>">Delivered</a>
+    <a href="/orders?status=COMPLETED" class="<%= status === 'COMPLETED' ? 'active' : '' %>">Completed</a>
+  </div>
+  <div class="card">
+    <% if (!orders.length) { %>
+      <div class="empty-state"><p>No orders yet.</p><a href="/orders/new" class="btn">Create an order</a></div>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Number</th><th>Client</th><th>Status</th><th>Start</th><th>Delivery due</th><th class="right">Total</th><th></th></tr></thead>
+        <tbody>
+          <% orders.forEach(function(o) { %>
+          <tr>
+            <td><strong><%= o.number %></strong></td>
+            <td><%= o.client_name %></td>
+            <td>
+              <span class="badge badge-muted"><%= o.status.replace('_',' ') %></span>
+              <% if (o.extension_status === 'REQUESTED') { %><span class="badge badge-warn">Ext. requested</span><% } %>
+            </td>
+            <td class="muted"><%= o.start_date ? new Date(o.start_date).toLocaleDateString() : '—' %></td>
+            <td class="muted"><%= o.delivery_date ? new Date(o.delivery_date).toLocaleDateString() : '—' %></td>
+            <td class="right"><%= tenant.currency %> <%= o.total.toFixed(2) %></td>
+            <td class="right"><a href="/orders/<%= o.id %>" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
