@@ -1,0 +1,64 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Welcome back<%= user ? ', ' + user.name.split(' ')[0] : '' %></h1><div class="sub">Here's how <%= tenant.name %> is doing.</div></div>
+    <a href="/reports" class="btn btn-outline">View full reports →</a>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom:20px;">
+    <div class="stat"><div class="label">Clients</div><div class="value"><%= clientCount %></div></div>
+    <div class="stat"><div class="label">Open jobs / orders</div><div class="value"><%= openOrders %></div><% if (pendingExtensions) { %><div class="delta" style="color:var(--warn)"><%= pendingExtensions %> extension request<%= pendingExtensions === 1 ? '' : 's' %></div><% } %></div>
+    <div class="stat"><div class="label">Outstanding invoices</div><div class="value"><%= tenant.currency %> <%= outstanding.toFixed(0) %></div><% if (overdueCount) { %><div class="delta down"><%= overdueCount %> overdue</div><% } %></div>
+    <div class="stat"><div class="label">Revenue this month</div><div class="value"><%= tenant.currency %> <%= monthRevenue.toFixed(0) %></div></div>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <div class="card-title">Recent quotes <a href="/quotes" style="font-size:0.8rem;font-weight:500;">View all →</a></div>
+        <% if (!recentQuotes.length) { %><div class="table-empty">No quotes yet.</div><% } else { %>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Number</th><th>Client</th><th>Status</th><th class="right">Total</th></tr></thead>
+          <tbody><% recentQuotes.forEach(function(q) { %>
+            <tr><td><a href="/quotes/<%= q.id %>"><%= q.number %></a></td><td><%= q.client_name %></td><td><span class="badge badge-muted"><%= q.status %></span></td><td class="right"><%= tenant.currency %> <%= q.total.toFixed(2) %></td></tr>
+          <% }) %></tbody>
+        </table></div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Upcoming deliveries <a href="/deliveries" style="font-size:0.8rem;font-weight:500;">View all →</a></div>
+        <% if (!upcomingDeliveries.length) { %><div class="table-empty">Nothing scheduled.</div><% } else { %>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Order</th><th>Client</th><th>Scheduled</th><th>Status</th></tr></thead>
+          <tbody><% upcomingDeliveries.forEach(function(d) { %>
+            <tr><td><a href="/orders/<%= d.order_id %>"><%= d.order_number %></a></td><td><%= d.client_name %></td><td class="muted"><%= d.scheduled_date ? new Date(d.scheduled_date).toLocaleDateString() : '—' %></td><td><span class="badge badge-muted"><%= d.status.replace('_',' ') %></span></td></tr>
+          <% }) %></tbody>
+        </table></div>
+        <% } %>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">Low stock <a href="/stock" style="font-size:0.8rem;font-weight:500;">View all →</a></div>
+        <% if (!lowStock.length) { %><div class="table-empty">All stock levels are healthy.</div><% } else { %>
+          <% lowStock.slice(0,6).forEach(function(i) { %>
+            <div class="kv"><span class="k"><a href="/stock/<%= i.id %>"><%= i.name %></a></span><span class="v" style="color:var(--danger)"><%= i.quantity_on_hand %> <%= i.unit %></span></div>
+          <% }) %>
+        <% } %>
+      </div>
+      <div class="card">
+        <div class="card-title">Quick actions</div>
+        <div class="tag-row" style="flex-direction:column;align-items:stretch;">
+          <a href="/quotes/new" class="btn btn-outline btn-sm">+ New quote</a>
+          <a href="/orders/new" class="btn btn-outline btn-sm">+ New order</a>
+          <a href="/invoices/new" class="btn btn-outline btn-sm">+ New invoice</a>
+          <a href="/stock/new" class="btn btn-outline btn-sm">+ Add stock item</a>
+          <a href="/clients/new" class="btn btn-outline btn-sm">+ Add client</a>
+        </div>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
