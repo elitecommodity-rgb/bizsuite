@@ -1,0 +1,33 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">B</div>
+      <div class="tenant-name"><%= tenant ? tenant.name : 'BizSuite' %></div>
+    </div>
+    <nav>
+      <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">📊 Dashboard</a>
+      <a href="/stock" class="<%= currentPath.startsWith('/stock') ? 'active' : '' %>">📦 Stock</a>
+      <a href="/clients" class="<%= currentPath.startsWith('/clients') ? 'active' : '' %>">👥 Clients</a>
+      <a href="/quotes" class="<%= currentPath.startsWith('/quotes') ? 'active' : '' %>">📝 Quotes</a>
+      <a href="/orders" class="<%= currentPath.startsWith('/orders') ? 'active' : '' %>">🗂️ Jobs / Orders</a>
+      <a href="/deliveries" class="<%= currentPath.startsWith('/deliveries') ? 'active' : '' %>">🚚 Deliveries</a>
+      <a href="/invoices" class="<%= currentPath.startsWith('/invoices') ? 'active' : '' %>">🧾 Invoices</a>
+      <a href="/reports" class="<%= currentPath.startsWith('/reports') ? 'active' : '' %>">📈 Reports</a>
+      <a href="/settings" class="<%= currentPath.startsWith('/settings') ? 'active' : '' %>">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div style="padding: 6px 12px 8px; font-size: 0.8rem; color: #a89d84;"><%= user ? user.name : '' %></div>
+      <form action="/logout" method="POST">
+        <button type="submit">Log out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div><strong><%= typeof title !== 'undefined' ? title : '' %></strong></div>
+      <div class="who"><%= tenant ? tenant.industry || 'General business' : '' %></div>
+    </div>
+    <div class="content">
+      <% if (flash) { %>
+        <div class="alert alert-<%= flash.type === 'error' ? 'error' : flash.type === 'success' ? 'success' : 'info' %>"><%= flash.message %></div>
+      <% } %>
