@@ -1,0 +1,44 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div>
+      <h1>Stock</h1>
+      <div class="sub"><%= items.length %> item<%= items.length === 1 ? '' : 's' %><% if (lowStockCount) { %> · <span style="color:var(--danger)"><%= lowStockCount %> low on stock</span><% } %></div>
+    </div>
+    <a href="/stock/new" class="btn">+ Add stock item</a>
+  </div>
+
+  <div class="card">
+    <form method="GET" action="/stock" style="margin-bottom: <%= items.length ? '14px' : '0' %>;">
+      <input type="text" name="q" placeholder="Search by name, SKU or category…" value="<%= q %>" />
+    </form>
+    <% if (!items.length) { %>
+      <div class="empty-state">
+        <p>No stock items yet.</p>
+        <a href="/stock/new" class="btn">Add your first item</a>
+      </div>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>Category</th><th class="right">On hand</th><th class="right">Reorder at</th><th class="right">Unit price</th><th></th></tr></thead>
+        <tbody>
+          <% items.forEach(function(it) { %>
+          <tr>
+            <td>
+              <a href="/stock/<%= it.id %>"><strong><%= it.name %></strong></a>
+              <% if (it.sku) { %><div class="muted" style="font-size:0.78rem;">SKU <%= it.sku %></div><% } %>
+            </td>
+            <td><%= it.category || '—' %></td>
+            <td class="right"><%= it.quantity_on_hand %> <%= it.unit %><% if (it.quantity_on_hand <= it.reorder_level) { %> <span class="badge badge-danger">Low</span><% } %></td>
+            <td class="right muted"><%= it.reorder_level %></td>
+            <td class="right"><%= tenant.currency %> <%= it.unit_price.toFixed(2) %></td>
+            <td class="right"><a href="/stock/<%= it.id %>" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>

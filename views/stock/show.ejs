@@ -1,0 +1,86 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div>
+      <h1><%= item.name %></h1>
+      <div class="sub"><%= item.category || 'Uncategorized' %><% if (item.sku) { %> · SKU <%= item.sku %><% } %></div>
+    </div>
+    <div class="tag-row">
+      <a href="/stock/<%= item.id %>/edit" class="btn btn-outline btn-sm">Edit</a>
+      <form method="POST" action="/stock/<%= item.id %>/delete" onsubmit="return confirm('Delete this stock item?');">
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <div class="card-title">Record stock movement</div>
+        <form method="POST" action="/stock/<%= item.id %>/movement">
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Type</label>
+              <select name="type">
+                <option value="IN">Stock in (received)</option>
+                <option value="OUT">Stock out (used / sold)</option>
+                <option value="ADJUST">Adjustment (correction)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Quantity (<%= item.unit %>)</label>
+              <input type="number" step="any" min="0.01" name="quantity" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Reason / note (optional)</label>
+            <input type="text" name="reason" placeholder="e.g. Delivery from supplier, Used on job #..." />
+          </div>
+          <button type="submit" class="btn">Record movement</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Movement history</div>
+        <% if (!movements.length) { %>
+          <div class="table-empty">No movements recorded yet.</div>
+        <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Type</th><th class="right">Qty</th><th>Reason</th></tr></thead>
+            <tbody>
+              <% movements.forEach(function(m) { %>
+              <tr>
+                <td class="muted"><%= new Date(m.created_at + 'Z').toLocaleString() %></td>
+                <td>
+                  <% if (m.type === 'IN') { %><span class="badge badge-success">In</span>
+                  <% } else if (m.type === 'OUT') { %><span class="badge badge-danger">Out</span>
+                  <% } else { %><span class="badge badge-info">Adjust</span><% } %>
+                </td>
+                <td class="right"><%= m.quantity %></td>
+                <td class="muted"><%= m.reason || '—' %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <% if (item.photo_url) { %><img src="<%= item.photo_url %>" style="width:100%;border-radius:8px;margin-bottom:14px;" /><% } %>
+        <div class="kv"><span class="k">On hand</span><span class="v"><%= item.quantity_on_hand %> <%= item.unit %></span></div>
+        <div class="kv"><span class="k">Reorder level</span><span class="v"><%= item.reorder_level %></span></div>
+        <div class="kv"><span class="k">Unit cost</span><span class="v"><%= tenant.currency %> <%= item.unit_cost.toFixed(2) %></span></div>
+        <div class="kv"><span class="k">Unit price</span><span class="v"><%= tenant.currency %> <%= item.unit_price.toFixed(2) %></span></div>
+        <div class="kv"><span class="k">Stock value (cost)</span><span class="v"><%= tenant.currency %> <%= (item.unit_cost * item.quantity_on_hand).toFixed(2) %></span></div>
+        <% if (item.quantity_on_hand <= item.reorder_level) { %>
+          <div class="alert alert-error" style="margin-top:14px;margin-bottom:0;">Below reorder level — consider restocking.</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
