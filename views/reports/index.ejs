@@ -1,0 +1,77 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Business performance</h1><div class="sub">Reviewing <%= period %></div></div>
+  </div>
+  <div class="pill-nav">
+    <a href="/reports?period=today" class="<%= period === 'today' ? 'active' : '' %>">Today</a>
+    <a href="/reports?period=week" class="<%= period === 'week' ? 'active' : '' %>">This week</a>
+    <a href="/reports?period=month" class="<%= period === 'month' ? 'active' : '' %>">This month</a>
+    <a href="/reports?period=quarter" class="<%= period === 'quarter' ? 'active' : '' %>">This quarter</a>
+    <a href="/reports?period=year" class="<%= period === 'year' ? 'active' : '' %>">This year</a>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom:20px;">
+    <div class="stat"><div class="label">Revenue collected</div><div class="value"><%= tenant.currency %> <%= revenueCollected.toFixed(0) %></div></div>
+    <div class="stat"><div class="label">Invoiced</div><div class="value"><%= tenant.currency %> <%= invoicesInPeriod.value.toFixed(0) %></div><div class="delta"><%= invoicesInPeriod.n %> invoice<%= invoicesInPeriod.n === 1 ? '' : 's' %></div></div>
+    <div class="stat"><div class="label">Quoted</div><div class="value"><%= tenant.currency %> <%= quotesInPeriod.value.toFixed(0) %></div><div class="delta"><%= quotesInPeriod.n %> quote<%= quotesInPeriod.n === 1 ? '' : 's' %></div></div>
+    <div class="stat"><div class="label">Orders value</div><div class="value"><%= tenant.currency %> <%= ordersInPeriod.value.toFixed(0) %></div><div class="delta"><%= ordersInPeriod.n %> order<%= ordersInPeriod.n === 1 ? '' : 's' %></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Revenue collected — last 14 days</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:120px;">
+      <% revenueByDay.forEach(function(d) { %>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;" title="<%= d.day %>: <%= tenant.currency %> <%= d.total.toFixed(2) %>">
+          <div style="width:100%;background:var(--brass);border-radius:3px 3px 0 0;height:<%= Math.max(2, Math.round((d.total / maxDaily) * 100)) %>%;"></div>
+        </div>
+      <% }) %>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <% revenueByDay.forEach(function(d, idx) { %>
+        <div style="flex:1;text-align:center;font-size:0.65rem;color:var(--muted);"><%= idx % 2 === 0 ? d.day.slice(5) : '' %></div>
+      <% }) %>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">Top clients (by invoiced value, this period)</div>
+      <% if (!topClients.length) { %><div class="table-empty">No invoiced activity yet this period.</div><% } else { %>
+        <% topClients.forEach(function(c) { %>
+          <div class="kv"><span class="k"><a href="/clients/<%= c.id %>"><%= c.name %></a></span><span class="v"><%= tenant.currency %> <%= c.invoiced.toFixed(2) %></span></div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quote conversion (this period)</div>
+      <div class="kv"><span class="k">Quotes issued</span><span class="v"><%= quoteConversion.sent %></span></div>
+      <div class="kv"><span class="k">Accepted</span><span class="v"><%= quoteConversion.accepted %></span></div>
+      <div class="kv grand"><span class="k">Conversion rate</span><span class="v"><%= quoteConversion.sent ? Math.round((quoteConversion.accepted / quoteConversion.sent) * 100) : 0 %>%</span></div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:14px 0;" />
+      <div class="card-title" style="margin-bottom:8px;">Stock movement (this period)</div>
+      <div class="kv"><span class="k">Received (in)</span><span class="v" style="color:var(--success)">+<%= stockIn %></span></div>
+      <div class="kv"><span class="k">Used / sold (out)</span><span class="v" style="color:var(--danger)">-<%= stockOut %></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Outstanding invoices (all time, soonest due first)</div>
+    <% if (!outstandingInvoices.length) { %><div class="table-empty">Nothing outstanding — nice work.</div><% } else { %>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Number</th><th>Client</th><th>Status</th><th>Due</th><th class="right">Outstanding</th></tr></thead>
+      <tbody><% outstandingInvoices.forEach(function(i) { %>
+        <tr>
+          <td><a href="/invoices/<%= i.id %>"><%= i.number %></a></td>
+          <td><%= i.client_name %></td>
+          <td><span class="badge <%= i.status === 'OVERDUE' ? 'badge-danger' : 'badge-muted' %>"><%= i.status %></span></td>
+          <td class="muted"><%= i.due_date ? new Date(i.due_date).toLocaleDateString() : '—' %></td>
+          <td class="right"><%= tenant.currency %> <%= (i.total - i.amount_paid).toFixed(2) %></td>
+        </tr>
+      <% }) %></tbody>
+    </table></div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
