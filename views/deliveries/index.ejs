@@ -1,0 +1,42 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Deliveries</h1><div class="sub"><%= deliveries.length %> delivery record<%= deliveries.length === 1 ? '' : 's' %></div></div>
+  </div>
+  <div class="pill-nav">
+    <a href="/deliveries" class="<%= !status ? 'active' : '' %>">All</a>
+    <a href="/deliveries?status=SCHEDULED" class="<%= status === 'SCHEDULED' ? 'active' : '' %>">Scheduled</a>
+    <a href="/deliveries?status=OUT_FOR_DELIVERY" class="<%= status === 'OUT_FOR_DELIVERY' ? 'active' : '' %>">Out for delivery</a>
+    <a href="/deliveries?status=DELIVERED" class="<%= status === 'DELIVERED' ? 'active' : '' %>">Delivered</a>
+    <a href="/deliveries?status=FAILED" class="<%= status === 'FAILED' ? 'active' : '' %>">Failed</a>
+  </div>
+  <div class="card">
+    <% if (!deliveries.length) { %>
+      <div class="empty-state"><p>No deliveries yet. Schedule one from an order.</p></div>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order</th><th>Client</th><th>Status</th><th>Scheduled</th><th>Address</th><th></th></tr></thead>
+        <tbody>
+          <% deliveries.forEach(function(d) { %>
+          <tr>
+            <td><a href="/orders/<%= d.order_id %>"><%= d.order_number %></a></td>
+            <td><%= d.client_name %></td>
+            <td>
+              <% if (d.status === 'DELIVERED') { %><span class="badge badge-success">Delivered</span>
+              <% } else if (d.status === 'FAILED') { %><span class="badge badge-danger">Failed</span>
+              <% } else if (d.status === 'OUT_FOR_DELIVERY') { %><span class="badge badge-info">Out for delivery</span>
+              <% } else { %><span class="badge badge-muted">Scheduled</span><% } %>
+            </td>
+            <td class="muted"><%= d.scheduled_date ? new Date(d.scheduled_date).toLocaleDateString() : '—' %></td>
+            <td class="muted"><%= d.address || '—' %></td>
+            <td class="right"><a href="/orders/<%= d.order_id %>" class="btn btn-sm btn-outline">View order</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
