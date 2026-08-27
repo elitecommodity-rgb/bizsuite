@@ -1,0 +1,62 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head"><h1><%= title %></h1></div>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <form method="POST" action="/invoices">
+    <% if (orderId) { %><input type="hidden" name="orderId" value="<%= orderId %>" /><% } %>
+    <div class="detail-grid">
+      <div>
+        <div class="card">
+          <div class="card-title">Line items</div>
+          <div class="table-wrap line-items-table">
+            <table>
+              <thead><tr><th>Stock item</th><th>Description</th><th>Qty</th><th>Unit price</th><th class="right">Total</th><th></th></tr></thead>
+              <tbody id="lineItemsBody"></tbody>
+            </table>
+          </div>
+          <button type="button" id="addLineItem" class="btn btn-outline btn-sm" style="margin-top:12px;">+ Add line</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Notes</div>
+          <textarea name="notes" placeholder="Payment terms, banking details, etc. (optional)"><%= invoice.notes || '' %></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="form-row">
+            <label>Client</label>
+            <select name="clientId" required <%= orderId ? 'disabled' : '' %>>
+              <option value="">Select a client…</option>
+              <% clients.forEach(function(c) { %>
+                <option value="<%= c.id %>" <%= String(invoice.client_id) === c.id ? 'selected' : '' %>><%= c.name %></option>
+              <% }) %>
+            </select>
+            <% if (orderId) { %><input type="hidden" name="clientId" value="<%= invoice.client_id %>" /><% } %>
+          </div>
+          <div class="form-row">
+            <label>Due date</label>
+            <input type="date" name="dueDate" />
+          </div>
+          <div class="form-row">
+            <label>Tax rate (%)</label>
+            <input type="number" step="0.01" id="taxRatePct" name="taxRatePct" value="<%= invoice.tax_rate_pct != null ? invoice.tax_rate_pct : 15 %>" />
+          </div>
+          <div class="totals-box">
+            <div class="kv"><span class="k">Subtotal</span><span class="v"><span id="calc-subtotal">0.00</span></span></div>
+            <div class="kv"><span class="k">Tax</span><span class="v"><span id="calc-tax">0.00</span></span></div>
+            <div class="kv grand"><span class="k">Total</span><span class="v"><span id="calc-total">0.00</span></span></div>
+          </div>
+          <button type="submit" class="btn btn-block" style="margin-top:16px;">Create invoice</button>
+          <a href="/invoices" class="btn btn-outline btn-block" style="margin-top:8px;">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </form>
+<%- include('../partials/app-end') %>
+<script>
+  window.STOCK_ITEMS = <%- safeJson(stockItems) %>;
+  window.INITIAL_LINES = <%- safeJson(lines) %>;
+</script>
+<script src="/public/js/app.js"></script>
+<script>initLineItems('lineItemsBody', 'addLineItem');</script>
+<%- include('../partials/foot') %>

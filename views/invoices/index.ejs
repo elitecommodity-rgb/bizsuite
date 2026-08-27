@@ -1,0 +1,45 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/app-start', { title }) %>
+  <div class="page-head">
+    <div><h1>Invoices</h1><div class="sub"><%= invoices.length %> invoice<%= invoices.length === 1 ? '' : 's' %> · <%= tenant.currency %> <%= outstandingTotal.toFixed(2) %> outstanding</div></div>
+    <a href="/invoices/new" class="btn">+ New invoice</a>
+  </div>
+  <div class="pill-nav">
+    <a href="/invoices" class="<%= !status ? 'active' : '' %>">All</a>
+    <a href="/invoices?status=DRAFT" class="<%= status === 'DRAFT' ? 'active' : '' %>">Draft</a>
+    <a href="/invoices?status=SENT" class="<%= status === 'SENT' ? 'active' : '' %>">Sent</a>
+    <a href="/invoices?status=PARTIALLY_PAID" class="<%= status === 'PARTIALLY_PAID' ? 'active' : '' %>">Partially paid</a>
+    <a href="/invoices?status=PAID" class="<%= status === 'PAID' ? 'active' : '' %>">Paid</a>
+    <a href="/invoices?status=OVERDUE" class="<%= status === 'OVERDUE' ? 'active' : '' %>">Overdue</a>
+  </div>
+  <div class="card">
+    <% if (!invoices.length) { %>
+      <div class="empty-state"><p>No invoices yet.</p><a href="/invoices/new" class="btn">Create an invoice</a></div>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Number</th><th>Client</th><th>Status</th><th>Due</th><th class="right">Total</th><th class="right">Outstanding</th><th></th></tr></thead>
+        <tbody>
+          <% invoices.forEach(function(i) { %>
+          <tr>
+            <td><strong><%= i.number %></strong></td>
+            <td><%= i.client_name %></td>
+            <td>
+              <% if (i.status === 'PAID') { %><span class="badge badge-success">Paid</span>
+              <% } else if (i.status === 'OVERDUE') { %><span class="badge badge-danger">Overdue</span>
+              <% } else if (i.status === 'PARTIALLY_PAID') { %><span class="badge badge-warn">Partial</span>
+              <% } else { %><span class="badge badge-muted"><%= i.status %></span><% } %>
+            </td>
+            <td class="muted"><%= i.due_date ? new Date(i.due_date).toLocaleDateString() : '—' %></td>
+            <td class="right"><%= tenant.currency %> <%= i.total.toFixed(2) %></td>
+            <td class="right"><%= tenant.currency %> <%= (i.total - i.amount_paid).toFixed(2) %></td>
+            <td class="right"><a href="/invoices/<%= i.id %>" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<%- include('../partials/app-end') %>
+<%- include('../partials/foot') %>
